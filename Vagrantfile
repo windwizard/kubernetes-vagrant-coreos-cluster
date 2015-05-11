@@ -57,6 +57,10 @@ DOCKERCFG = File.expand_path(ENV['DOCKERCFG'] || "~/.dockercfg")
 
 KUBERNETES_VERSION = ENV['KUBERNETES_VERSION'] || '0.16.2'
 
+USE_BINARY = ENV['USE_BINARY'] || false
+BINARY_FOLDER = File.join(File.dirname(__FILE__), ENV['BINARY_FOLDER'] || 'binary')
+DOCKER_REGISTRY = ENV['DOCKER_REGISTRY'] || '172.16.1.41'
+
 CHANNEL = ENV['CHANNEL'] || 'alpha'
 if CHANNEL != 'alpha'
   puts "============================================================================="
@@ -351,6 +355,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
+      if USE_BINARY && File.exist?(BINARY_FOLDER)
+	kHost.vm.provision :shell, inline: "echo synchronize folder"
+        kHost.vm.synced_folder "#{BINARY_FOLDER}", "/mnt/bin", create: true
+      end
+
       if File.exist?(cfg)
         kHost.vm.provision :file, :source => "#{cfg}", :destination => "/tmp/vagrantfile-user-data"
         kHost.vm.provision :shell, :privileged => true,
@@ -364,6 +373,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           sed -i "s|__ETCD_SEED_CLUSTER__|#{ETCD_SEED_CLUSTER}|g" /tmp/vagrantfile-user-data
           sed -i "s|__NODE_CPUS__|#{NODE_CPUS}|g" /tmp/vagrantfile-user-data
           sed -i "s|__NODE_MEM__|#{NODE_MEM}|g" /tmp/vagrantfile-user-data
+          sed -i "s|__DOCKER_REGISTRY__|#{DOCKER_REGISTRY}|g" /tmp/vagrantfile-user-data
           mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/
         EOF
       end
