@@ -57,7 +57,7 @@ DOCKERCFG = File.expand_path(ENV['DOCKERCFG'] || "~/.dockercfg")
 
 KUBERNETES_VERSION = ENV['KUBERNETES_VERSION'] || '0.16.2'
 
-USE_BINARY = ENV['USE_BINARY'] || false
+USE_BINARY = ENV['USE_BINARY'] || true
 BINARY_FOLDER = File.join(File.dirname(__FILE__), ENV['BINARY_FOLDER'] || 'binary')
 DOCKER_REGISTRY = ENV['DOCKER_REGISTRY'] || '172.16.1.41'
 
