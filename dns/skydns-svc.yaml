@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1beta3
+metadata:
+  labels:
+    k8s-app: kube-dns
+    name: kube-dns
+    kubernetes.io/cluster-service: "true"
+  name: kube-dns
+  namespace: default
+spec:
+  ports:
+    - port: 53
+      protocol: UDP
+      targetPort: 53
+  publicIPs:
+    - "172.17.8.102"
+  selector:
+    k8s-app: kube-dns

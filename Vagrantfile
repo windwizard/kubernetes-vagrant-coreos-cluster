@@ -200,12 +200,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
         
         kHost.trigger.after [:up] do
-          info "Installing kubectl for the kubernetes version we just bootstrapped..."
-          if OS.windows?
-            run_remote "/bin/sh /home/core/kubectlsetup install"
-          else
-            system "./temp/setup install"
-          end
+          #info "Installing kubectl for the kubernetes version we just bootstrapped..."
+          #if OS.windows?
+          #  run_remote "/bin/sh /home/core/kubectlsetup install"
+          #else
+          #  system "./temp/setup install"
+          #end
 
           info "Waiting for Kubernetes master to become ready..."
           j, uri, res = 0, URI("http://#{MASTER_IP}:8080"), nil
@@ -224,11 +224,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             res = Net::HTTP.get_response(uri)
           rescue
           end
+
+          info "set up dns controller"
           if not res.is_a? Net::HTTPSuccess
             if OS.windows?
               run_remote "/opt/bin/kubectl create -f /home/core/dns-controller.yaml"
             else
-              system "kubectl create -f temp/dns-controller.yaml"
+              #system "kubectl create -f temp/dns-controller.yaml"
+              system "binary/kubectl -s 'http://172.17.8.101:8080' create -f dns/skydns-rc.yaml"
             end
           end
 
@@ -237,11 +240,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             res = Net::HTTP.get_response(uri)
           rescue
           end
+          info "set up dns service"
           if not res.is_a? Net::HTTPSuccess
             if OS.windows?
               run_remote "/opt/bin/kubectl create -f /home/core/dns-service.yaml"
             else
-              system "kubectl create -f dns/dns-service.yaml"
+              #system "kubectl create -f dns/dns-service.yaml"
+              system "binary/kubectl -s 'http://172.17.8.101:8080' create -f dns/skydns-svc.yaml"
             end
           end
 

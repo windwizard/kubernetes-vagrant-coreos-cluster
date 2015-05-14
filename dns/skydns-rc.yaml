@@ -1,0 +1,48 @@
+kind: ReplicationController
+apiVersion: v1beta3
+metadata:
+  name: kube-dns
+  namespace: default
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        name: kube-dns
+        k8s-app: kube-dns
+        kubernetes.io/cluster-service: "true"
+    spec:
+      dnsPolicy: "Default"  # Don't use cluster DNS.
+      containers:
+      - name: etcd
+        image: 172.16.1.41:5000/coreos/etcd:v2.0.3
+        args: [
+             # entrypoint = "/etcd",
+             "-listen-client-urls=http://0.0.0.0:2379,http://0.0.0.0:4001",
+             "-initial-cluster-token=skydns-etcd",
+             "-advertise-client-urls=http://127.0.0.1:4001",
+        ]
+      - name: kube2sky
+        image: 172.16.1.41:5000/kube2sky:20150414-02
+        args: [
+             "/kube2sky",
+        ]
+      - name: skydns
+        image: 172.16.1.41:5000/skydns:20150408-01
+        args: [
+             "bootstrap.sh",
+        ]
+        env:
+          - name: ETCD_MACHINES
+            value: 'http://localhost:4001'
+          - name: INIT_SKYDNS_CONFIG
+            value: '1'
+        ports:
+          - name: dns
+            containerPort: 53
+            protocol: UDP
