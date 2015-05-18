@@ -46,7 +46,8 @@ coreos:
         [Service]
         ExecStartPre=-/usr/bin/mkdir -p /opt/bin
         ExecStartPre=-/usr/bin/mkdir -p /var/log/kubernetes
-        ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment
+        ExecStartPre=/usr/bin/cp /mnt/bin/setup-network-environment /opt/bin/
+        #ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/setup-network-environment
         ExecStartPre=/usr/bin/chmod +x /opt/bin/setup-network-environment
         ExecStart=/opt/bin/setup-network-environment
         RemainAfterExit=yes
