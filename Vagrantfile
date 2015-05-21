@@ -93,6 +93,9 @@ DNS_UPSTREAM_SERVERS = ENV['DNS_UPSTREAM_SERVERS'] || "8.8.8.8:53,8.8.4.4:53"
 SERIAL_LOGGING = (ENV['SERIAL_LOGGING'].to_s.downcase == 'true')
 GUI = (ENV['GUI'].to_s.downcase == 'true')
 
+REMOVE_VAGRANTFILE_USER_DATA_BEFORE_HALT = (ENV['REMOVE_VAGRANTFILE_USER_DATA_BEFORE_HALT'].to_s.downcase == 'true')
+# if this is set true, remember to use --provision when executing vagrant up / reload
+
 CLOUD_PROVIDER = ENV['CLOUD_PROVIDER'].to_s.downcase || 'vagrant'
 validCloudProviders = [ 'gce', 'gke', 'aws', 'azure', 'vagrant', 'vsphere',
   'libvirt-coreos', 'juju' ]
@@ -264,7 +267,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
 
       kHost.trigger.before [:halt, :reload] do
-        run_remote "sudo rm -f /var/lib/coreos-vagrant/vagrantfile-user-data"
+        if REMOVE_VAGRANTFILE_USER_DATA_BEFORE_HALT
+          run_remote "sudo rm -f /var/lib/coreos-vagrant/vagrantfile-user-data"
+        end
       end
 
       kHost.trigger.before [:destroy] do
